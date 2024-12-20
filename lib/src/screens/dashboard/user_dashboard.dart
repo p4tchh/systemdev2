@@ -1,179 +1,188 @@
 import 'package:flutter/material.dart';
+import '/src/widgets/profile_menu.dart';
+import '/src/widgets/featured_carousel.dart';
 
 class MainActivity extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF5F5F5),
-      body: Column(
-        children: [
-          // Top Profile Section
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.account_circle,
-                  size: 40.0,
-                  color: Colors.grey,
-                ),
-                SizedBox(width: 8.0),
-                Text(
-                  "UPCYCLING CONNECT",
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.bold,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Top Profile Section with enhanced styling
+            Container(
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 5,
+                    offset: Offset(0, 2),
                   ),
-                ),
-                Spacer(),
-                IconButton(
-                  onPressed: () {}, // Add favorite action
-                  icon: Icon(Icons.star_border),
-                ),
-                IconButton(
-                  onPressed: () {}, // Add notification action
-                  icon: Icon(Icons.notifications_none),
-                ),
-              ],
-            ),
-          ),
-
-          // Search Section
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            padding: const EdgeInsets.all(8.0),
-            decoration: BoxDecoration(
-              color: Colors.lightGreen,
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.search,
-                  color: Colors.white,
-                ),
-                SizedBox(width: 8.0),
-                Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: "Search",
-                      hintStyle: TextStyle(color: Colors.white),
-                      border: InputBorder.none,
+                ],
+              ),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: Colors.lightGreen.shade200,
+                    radius: 20,
+                    child: InkWell(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          barrierColor: Colors.transparent,
+                          builder: (context) => Dialog(
+                            alignment: Alignment.topLeft,
+                            insetPadding: EdgeInsets.only(top: 70, left: 16),
+                            backgroundColor: Colors.transparent,
+                            elevation: 0,
+                            child: ProfileMenu(),
+                          ),
+                        );
+                      },
+                      child: Icon(
+                        Icons.account_circle,
+                        size: 30.0,
+                        color: Colors.lightGreen.shade700,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-
-          // Header Section
-          Container(
-            padding: const EdgeInsets.all(16.0),
-            color: Colors.lightGreen,
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    "Transform your fridge with these DIY polymer clay magnets",
+                  SizedBox(width: 12.0),
+                  Text(
+                    "UPCYCLING CONNECT",
                     style: TextStyle(
-                      fontSize: 13.0,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.lightGreen.shade700,
                     ),
                   ),
-                ),
-                Image.asset(
-                  'assets/images/cutie.png', // Optional image, replace with a placeholder if not used
-                  width: 120.0,
-                  height: 120.0,
-                  fit: BoxFit.cover,
-                ),
-              ],
-            ),
-          ),
-
-          // Category Button Section
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CategoryButton(label: "Popular"),
-                SizedBox(width: 8.0),
-                CategoryButton(label: "New"),
-                SizedBox(width: 8.0),
-                CategoryButton(label: "Sold Out"),
-              ],
-            ),
-          ),
-
-          // RecyclerView Section Placeholder
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: ListView.builder(
-                itemCount: 6, // Simulated item count
-                itemBuilder: (context, index) {
-                  return Card(
-                    margin: EdgeInsets.only(bottom: 8.0),
-                    child: ListTile(
-                      leading: Icon(Icons.image), // Placeholder icon
-                      title: Text("Item $index"),
-                      subtitle: Text("Item description goes here."),
-                    ),
-                  );
-                },
+                  Spacer(),
+                  IconButton(
+                    onPressed: () {},
+                    icon: Icon(Icons.star_border, color: Colors.amber),
+                  ),
+                  IconButton(
+                    onPressed: () {},
+                    icon:
+                        Icon(Icons.notifications_none, color: Colors.grey[700]),
+                  ),
+                ],
               ),
             ),
-          ),
 
-          // Bottom Navigation Bar
-          Container(
-            color: Colors.lightGreen,
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.home, color: Colors.white),
-                  onPressed: () {
-                    // Handle Home navigation
-                  },
-                ),
-                IconButton(
-                  icon: Icon(Icons.shopping_cart, color: Colors.white),
-                  onPressed: () {
-                    // Handle Cart navigation
-                  },
-                ),
-                IconButton(
-                  icon: Icon(Icons.star, color: Colors.white),
-                  onPressed: () {
-                    // Handle Featured navigation
-                  },
-                ),
-                IconButton(
-                  icon: Icon(Icons.shopping_bag, color: Colors.white),
-                  onPressed: () {
-                    // Handle Orders navigation
-                  },
-                ),
-                IconButton(
-                  icon: Icon(Icons.chat_bubble_outline, color: Colors.white),
-                  onPressed: () {
-                    // Handle Favorites/Chats navigation
-                  },
-                ),
-                IconButton(
-                  icon: Icon(Icons.handshake, color: Colors.white),
-                  onPressed: () {
-                    // Handle Handshake navigation
-                  },
-                ),
-              ],
+            Expanded(
+              child: ListView(
+                children: [
+                  // Search Section with enhanced styling
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 5,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: TextField(
+                        decoration: InputDecoration(
+                          hintText: "Search products...",
+                          prefixIcon:
+                              Icon(Icons.search, color: Colors.lightGreen),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16.0, vertical: 14.0),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Featured Carousel Section
+                  const FeaturedCarousel(),
+
+                  // Category Buttons with enhanced styling
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Expanded(
+                          child: CategoryButton(
+                            label: "Popular",
+                            isSelected: true,
+                          ),
+                        ),
+                        SizedBox(width: 8.0),
+                        Expanded(
+                          child: CategoryButton(
+                            label: "New",
+                            isSelected: false,
+                          ),
+                        ),
+                        SizedBox(width: 8.0),
+                        Expanded(
+                          child: CategoryButton(
+                            label: "Sold Out",
+                            isSelected: false,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Product Grid
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.75,
+                      crossAxisSpacing: 16.0,
+                      mainAxisSpacing: 16.0,
+                    ),
+                    itemCount: 4,
+                    itemBuilder: (context, index) {
+                      return ProductCard();
+                    },
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+
+            // Bottom Navigation Bar with enhanced styling
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 5,
+                    offset: Offset(0, -2),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 12.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  NavBarIcon(icon: Icons.home, label: "Home", isSelected: true),
+                  NavBarIcon(icon: Icons.shopping_cart, label: "Cart"),
+                  NavBarIcon(icon: Icons.star, label: "Featured"),
+                  NavBarIcon(icon: Icons.shopping_bag, label: "Orders"),
+                  NavBarIcon(icon: Icons.chat_bubble_outline, label: "Chats"),
+                  NavBarIcon(icon: Icons.handshake, label: "Deals"),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -181,25 +190,133 @@ class MainActivity extends StatelessWidget {
 
 class CategoryButton extends StatelessWidget {
   final String label;
+  final bool isSelected;
 
-  const CategoryButton({required this.label});
+  const CategoryButton({
+    required this.label,
+    this.isSelected = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: () {
-        // Handle button press
-      },
+      onPressed: () {},
       style: ElevatedButton.styleFrom(
-        backgroundColor: Color(0xFFC7D6B6),
+        backgroundColor: isSelected ? Colors.lightGreen : Colors.white,
+        foregroundColor: isSelected ? Colors.white : Colors.grey[800],
+        elevation: isSelected ? 2 : 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.0),
+          borderRadius: BorderRadius.circular(12.0),
+          side: BorderSide(
+            color: isSelected ? Colors.transparent : Colors.grey.shade300,
+          ),
         ),
-        minimumSize: Size(113.0, 40.0),
+        padding: EdgeInsets.symmetric(vertical: 12.0),
       ),
       child: Text(
         label,
-        style: TextStyle(color: Colors.black),
+        style: TextStyle(
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
+    );
+  }
+}
+
+class NavBarIcon extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isSelected;
+
+  const NavBarIcon({
+    required this.icon,
+    required this.label,
+    this.isSelected = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          color: isSelected ? Colors.lightGreen : Colors.grey[600],
+        ),
+        SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: isSelected ? Colors.lightGreen : Colors.grey[600],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class ProductCard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 5,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 3,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.lightGreen.shade50,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+              ),
+              child: Center(
+                child: Icon(
+                  Icons.image,
+                  size: 64,
+                  color: Colors.lightGreen.shade200,
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Cloud Tulip Mirror",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16.0,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    "₱257",
+                    style: TextStyle(
+                      color: Colors.lightGreen,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
