@@ -1,8 +1,64 @@
 import 'package:flutter/material.dart';
 import '/src/widgets/profile_menu.dart';
 import '/src/widgets/featured_carousel.dart';
+import '/src/widgets/notification_menu.dart';
+import '/src/widgets/category_section.dart';
+import '/src/widgets/cart_section.dart';
+import '/src/widgets/orders_section.dart';
+import '/src/widgets/chat_section.dart';
+import '/src/widgets/tutorials_section.dart';
+import '/src/widgets/donations_section.dart';
 
-class MainActivity extends StatelessWidget {
+class MainActivity extends StatefulWidget {
+  @override
+  State<MainActivity> createState() => _MainActivityState();
+}
+
+class _MainActivityState extends State<MainActivity> {
+  int _currentIndex = 0;
+
+  final List<Widget> _pages = [
+    SingleChildScrollView(
+      child: Column(
+        children: [
+          // Search Section
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12.0),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 5,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: "Search products...",
+                  prefixIcon: Icon(Icons.search, color: Colors.lightGreen),
+                  border: InputBorder.none,
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+                ),
+              ),
+            ),
+          ),
+          const FeaturedCarousel(),
+          const CategorySection(),
+        ],
+      ),
+    ),
+    CartSection(),
+    OrdersSection(),
+    ChatSection(),
+    TutorialsSection(),
+    DonationsSection(),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,7 +120,19 @@ class MainActivity extends StatelessWidget {
                     icon: Icon(Icons.star_border, color: Colors.amber),
                   ),
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        barrierColor: Colors.transparent,
+                        builder: (context) => Dialog(
+                          alignment: Alignment.topRight,
+                          insetPadding: EdgeInsets.only(top: 70, right: 16),
+                          backgroundColor: Colors.transparent,
+                          elevation: 0,
+                          child: NotificationMenu(),
+                        ),
+                      );
+                    },
                     icon:
                         Icon(Icons.notifications_none, color: Colors.grey[700]),
                   ),
@@ -73,87 +141,7 @@ class MainActivity extends StatelessWidget {
             ),
 
             Expanded(
-              child: ListView(
-                children: [
-                  // Search Section with enhanced styling
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12.0),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 5,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hintText: "Search products...",
-                          prefixIcon:
-                              Icon(Icons.search, color: Colors.lightGreen),
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16.0, vertical: 14.0),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  // Featured Carousel Section
-                  const FeaturedCarousel(),
-
-                  // Category Buttons with enhanced styling
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Expanded(
-                          child: CategoryButton(
-                            label: "Popular",
-                            isSelected: true,
-                          ),
-                        ),
-                        SizedBox(width: 8.0),
-                        Expanded(
-                          child: CategoryButton(
-                            label: "New",
-                            isSelected: false,
-                          ),
-                        ),
-                        SizedBox(width: 8.0),
-                        Expanded(
-                          child: CategoryButton(
-                            label: "Sold Out",
-                            isSelected: false,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Product Grid
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    padding: EdgeInsets.symmetric(horizontal: 16.0),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.75,
-                      crossAxisSpacing: 16.0,
-                      mainAxisSpacing: 16.0,
-                    ),
-                    itemCount: 4,
-                    itemBuilder: (context, index) {
-                      return ProductCard();
-                    },
-                  ),
-                ],
-              ),
+              child: _pages[_currentIndex],
             ),
 
             // Bottom Navigation Bar with enhanced styling
@@ -172,12 +160,42 @@ class MainActivity extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  NavBarIcon(icon: Icons.home, label: "Home", isSelected: true),
-                  NavBarIcon(icon: Icons.shopping_cart, label: "Cart"),
-                  NavBarIcon(icon: Icons.star, label: "Featured"),
-                  NavBarIcon(icon: Icons.shopping_bag, label: "Orders"),
-                  NavBarIcon(icon: Icons.chat_bubble_outline, label: "Chats"),
-                  NavBarIcon(icon: Icons.handshake, label: "Deals"),
+                  NavBarIcon(
+                    icon: Icons.home,
+                    label: "Home",
+                    isSelected: _currentIndex == 0,
+                    onTap: () => setState(() => _currentIndex = 0),
+                  ),
+                  NavBarIcon(
+                    icon: Icons.shopping_cart,
+                    label: "Cart",
+                    isSelected: _currentIndex == 1,
+                    onTap: () => setState(() => _currentIndex = 1),
+                  ),
+                  NavBarIcon(
+                    icon: Icons.shopping_bag,
+                    label: "Orders",
+                    isSelected: _currentIndex == 2,
+                    onTap: () => setState(() => _currentIndex = 2),
+                  ),
+                  NavBarIcon(
+                    icon: Icons.chat_bubble_outline,
+                    label: "Chats",
+                    isSelected: _currentIndex == 3,
+                    onTap: () => setState(() => _currentIndex = 3),
+                  ),
+                  NavBarIcon(
+                    icon: Icons.school_outlined,
+                    label: "Tutorials",
+                    isSelected: _currentIndex == 4,
+                    onTap: () => setState(() => _currentIndex = 4),
+                  ),
+                  NavBarIcon(
+                    icon: Icons.volunteer_activism,
+                    label: "Donations",
+                    isSelected: _currentIndex == 5,
+                    onTap: () => setState(() => _currentIndex = 5),
+                  ),
                 ],
               ),
             ),
@@ -188,135 +206,54 @@ class MainActivity extends StatelessWidget {
   }
 }
 
-class CategoryButton extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-
-  const CategoryButton({
-    required this.label,
-    this.isSelected = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () {},
-      style: ElevatedButton.styleFrom(
-        backgroundColor: isSelected ? Colors.lightGreen : Colors.white,
-        foregroundColor: isSelected ? Colors.white : Colors.grey[800],
-        elevation: isSelected ? 2 : 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.0),
-          side: BorderSide(
-            color: isSelected ? Colors.transparent : Colors.grey.shade300,
-          ),
-        ),
-        padding: EdgeInsets.symmetric(vertical: 12.0),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        ),
-      ),
-    );
-  }
-}
-
 class NavBarIcon extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool isSelected;
+  final VoidCallback? onTap;
 
   const NavBarIcon({
     required this.icon,
     required this.label,
     this.isSelected = false,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          icon,
-          color: isSelected ? Colors.lightGreen : Colors.grey[600],
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 200),
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Colors.lightGreen.withOpacity(0.1)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
         ),
-        SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: isSelected ? Colors.lightGreen : Colors.grey[600],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class ProductCard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 5,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 3,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.lightGreen.shade50,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
-              ),
-              child: Center(
-                child: Icon(
-                  Icons.image,
-                  size: 64,
-                  color: Colors.lightGreen.shade200,
-                ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedScale(
+              duration: Duration(milliseconds: 200),
+              scale: isSelected ? 1.2 : 1.0,
+              child: Icon(
+                icon,
+                color: isSelected ? Colors.lightGreen : Colors.grey[600],
               ),
             ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Cloud Tulip Mirror",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16.0,
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    "₱257",
-                    style: TextStyle(
-                      color: Colors.lightGreen,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+            SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: isSelected ? Colors.lightGreen : Colors.grey[600],
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
