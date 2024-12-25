@@ -1,12 +1,80 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RegisterScreen extends StatelessWidget {
+  // Text controllers to get user input
+  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
+
+  // Function to handle registration
+  Future<void> _register(BuildContext context) async {
+    final username = usernameController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+    final confirmPassword = confirmPasswordController.text.trim();
+
+    // Validate input
+    if (username.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+      _showMessage(context, 'All fields are required');
+      return;
+    }
+
+    if (password != confirmPassword) {
+      _showMessage(context, 'Passwords do not match');
+      return;
+    }
+
+    try {
+      // Register the user using Supabase
+      final AuthResponse response = await Supabase.instance.client.auth.signUp(
+        email: email,
+        password: password,
+      );
+
+      // Check if the user is successfully registered
+      if (response.user != null) {
+        // Insert profile into the profiles table
+        final insertResponse = await Supabase.instance.client
+            .from('profiles') // Ensure this matches your table name
+            .insert({
+          'id': response.user!.id, // Match auth.users.id
+          'username': username, // Add username
+          'email': email, // Add email
+          'role': 'user', // Default role; can later be updated to admin
+        });
+
+        if (insertResponse.error == null) {
+          _showMessage(context, 'Registration successful');
+        } else {
+          _showMessage(context, 'Failed to create profile: ${insertResponse.error!.message}');
+        }
+      } else {
+        _showMessage(context, 'Unexpected error occurred during registration');
+      }
+    } on AuthException catch (e) {
+      // Handle authentication errors
+      _showMessage(context, 'Auth error: ${e.message}');
+    } catch (e) {
+      // Handle any other unexpected errors
+      _showMessage(context, 'Unexpected error: $e');
+    }
+  }
+
+  // Function to display messages
+  void _showMessage(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [Colors.greenAccent, Colors.lightGreen],
             begin: Alignment.topLeft,
@@ -33,7 +101,7 @@ class RegisterScreen extends StatelessWidget {
                           onPressed: () {
                             Navigator.pop(context); // Navigate back to the previous screen
                           },
-                          icon: Icon(Icons.arrow_back),
+                          icon: const Icon(Icons.arrow_back),
                           iconSize: 48.0,
                         ),
                       ),
@@ -43,7 +111,7 @@ class RegisterScreen extends StatelessWidget {
                         width: 150.0,
                         fit: BoxFit.contain,
                       ),
-                      SizedBox(height: 16.0),
+                      const SizedBox(height: 16.0),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -53,28 +121,28 @@ class RegisterScreen extends StatelessWidget {
                                 Navigator.pop(context); // Navigate back to Login Screen
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Color(0x65FFFFFF),
+                                backgroundColor: const Color(0x65FFFFFF),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20.0),
                                 ),
                               ),
-                              child: Text(
+                              child: const Text(
                                 "SIGN IN",
                                 style: TextStyle(color: Colors.black),
                               ),
                             ),
                           ),
-                          SizedBox(width: 8.0),
+                          const SizedBox(width: 8.0),
                           Flexible(
                             child: ElevatedButton(
                               onPressed: () {}, // Keep this button active for the current screen
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Color(0x65C7D6B6),
+                                backgroundColor: const Color(0x65C7D6B6),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20.0),
                                 ),
                               ),
-                              child: Text(
+                              child: const Text(
                                 "SIGN UP",
                                 style: TextStyle(color: Colors.black),
                               ),
@@ -82,7 +150,7 @@ class RegisterScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-                      SizedBox(height: 20.0),
+                      const SizedBox(height: 20.0),
                       Text(
                         "HELLO!",
                         style: GoogleFonts.lato(
@@ -90,13 +158,14 @@ class RegisterScreen extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: 10.0),
+                      const SizedBox(height: 10.0),
                       Text(
                         "New User",
                         style: GoogleFonts.lato(fontSize: 14.0),
                       ),
-                      SizedBox(height: 20.0),
+                      const SizedBox(height: 20.0),
                       TextField(
+                        controller: usernameController,
                         decoration: InputDecoration(
                           hintText: "USERNAME",
                           filled: true,
@@ -106,11 +175,12 @@ class RegisterScreen extends StatelessWidget {
                             borderSide: BorderSide.none,
                           ),
                           contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12.0),
+                          const EdgeInsets.symmetric(horizontal: 12.0),
                         ),
                       ),
-                      SizedBox(height: 20.0),
+                      const SizedBox(height: 20.0),
                       TextField(
+                        controller: emailController,
                         decoration: InputDecoration(
                           hintText: "EMAIL ADDRESS",
                           filled: true,
@@ -120,11 +190,12 @@ class RegisterScreen extends StatelessWidget {
                             borderSide: BorderSide.none,
                           ),
                           contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12.0),
+                          const EdgeInsets.symmetric(horizontal: 12.0),
                         ),
                       ),
-                      SizedBox(height: 20.0),
+                      const SizedBox(height: 20.0),
                       TextField(
+                        controller: passwordController,
                         obscureText: true,
                         decoration: InputDecoration(
                           hintText: "PASSWORD",
@@ -135,11 +206,12 @@ class RegisterScreen extends StatelessWidget {
                             borderSide: BorderSide.none,
                           ),
                           contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12.0),
+                          const EdgeInsets.symmetric(horizontal: 12.0),
                         ),
                       ),
-                      SizedBox(height: 20.0),
+                      const SizedBox(height: 20.0),
                       TextField(
+                        controller: confirmPasswordController,
                         obscureText: true,
                         decoration: InputDecoration(
                           hintText: "CONFIRM PASSWORD",
@@ -150,22 +222,20 @@ class RegisterScreen extends StatelessWidget {
                             borderSide: BorderSide.none,
                           ),
                           contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12.0),
+                          const EdgeInsets.symmetric(horizontal: 12.0),
                         ),
                       ),
-                      SizedBox(height: 20.0),
+                      const SizedBox(height: 20.0),
                       ElevatedButton(
-                        onPressed: () {
-                          // Add register functionality later
-                        },
+                        onPressed: () => _register(context),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFFA4C3A3),
-                          minimumSize: Size(double.infinity, 48.0),
+                          backgroundColor: const Color(0xFFA4C3A3),
+                          minimumSize: const Size(double.infinity, 48.0),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20.0),
                           ),
                         ),
-                        child: Text("SIGN UP"),
+                        child: const Text("SIGN UP"),
                       ),
                     ],
                   ),

@@ -8,226 +8,162 @@ import '/src/widgets/orders_section.dart';
 import '/src/widgets/chat_section.dart';
 import '/src/widgets/tutorials_section.dart';
 import '/src/widgets/donations_section.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-class MainActivity extends StatefulWidget {
+class UserDashboard extends StatefulWidget {
+  final String username; // Pass username from the backend
+
+  const UserDashboard({Key? key, required this.username}) : super(key: key);
+
   @override
-  State<MainActivity> createState() => _MainActivityState();
+  State<UserDashboard> createState() => _UserDashboardState();
 }
 
-class _MainActivityState extends State<MainActivity> {
+class _UserDashboardState extends State<UserDashboard> {
   int _currentIndex = 0;
+  String? _profileImageUrl; // Store profile image URL
 
-  final List<Widget> _pages = [
-    SingleChildScrollView(
-      child: Column(
-        children: [
-          // Search Section
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12.0),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 5,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: "Search products...",
-                  prefixIcon: Icon(Icons.search, color: Colors.lightGreen),
-                  border: InputBorder.none,
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
-                ),
-              ),
-            ),
-          ),
-          const FeaturedCarousel(),
-          const CategorySection(),
-        ],
-      ),
-    ),
-    CartSection(),
-    OrdersSection(),
-    ChatSection(),
-    TutorialsSection(),
-    DonationsSection(),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadProfilePicture(); // Fetch the profile picture from Supabase
+  }
+
+  Future<void> _loadProfilePicture() async {
+    try {
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+
+      if (userId != null) {
+        // Fetch the profile image URL from the profiles table
+        final response = await Supabase.instance.client
+            .from('profiles')
+            .select('profile_image_url')
+            .eq('id', userId)
+            .maybeSingle();
+
+        if (response != null) {
+          setState(() {
+            _profileImageUrl = response['profile_image_url'];
+          });
+        } else {
+          print('No profile picture found.');
+        }
+      }
+    } catch (e) {
+      print('Error loading profile picture: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF5F5F5),
+      backgroundColor: const Color(0xFFF5F5F5),
       body: SafeArea(
         child: Column(
           children: [
-            // Top Profile Section with enhanced styling
-            Container(
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 5,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    backgroundColor: Colors.lightGreen.shade200,
-                    radius: 20,
-                    child: InkWell(
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          barrierColor: Colors.transparent,
-                          builder: (context) => Dialog(
-                            alignment: Alignment.topLeft,
-                            insetPadding: EdgeInsets.only(top: 70, left: 16),
-                            backgroundColor: Colors.transparent,
-                            elevation: 0,
-                            child: ProfileMenu(),
-                          ),
-                        );
-                      },
-                      child: Icon(
-                        Icons.account_circle,
-                        size: 30.0,
-                        color: Colors.lightGreen.shade700,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 12.0),
-                  Text(
-                    "UPCYCLING CONNECT",
-                    style: TextStyle(
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.lightGreen.shade700,
-                    ),
-                  ),
-                  Spacer(),
-                  IconButton(
-                    onPressed: () {},
-                    icon: Icon(Icons.star_border, color: Colors.amber),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        barrierColor: Colors.transparent,
-                        builder: (context) => Dialog(
-                          alignment: Alignment.topRight,
-                          insetPadding: EdgeInsets.only(top: 70, right: 16),
-                          backgroundColor: Colors.transparent,
-                          elevation: 0,
-                          child: NotificationMenu(),
-                        ),
-                      );
-                    },
-                    icon:
-                        Icon(Icons.notifications_none, color: Colors.grey[700]),
-                  ),
-                ],
-              ),
-            ),
-
-            Expanded(
-              child: _pages[_currentIndex],
-            ),
-
-            // Bottom Navigation Bar with enhanced styling
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 5,
-                    offset: Offset(0, -2),
-                  ),
-                ],
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 12.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  NavBarIcon(
-                    icon: Icons.home,
-                    label: "Home",
-                    isSelected: _currentIndex == 0,
-                    onTap: () => setState(() => _currentIndex = 0),
-                  ),
-                  NavBarIcon(
-                    icon: Icons.shopping_cart,
-                    label: "Cart",
-                    isSelected: _currentIndex == 1,
-                    onTap: () => setState(() => _currentIndex = 1),
-                  ),
-                  NavBarIcon(
-                    icon: Icons.shopping_bag,
-                    label: "Orders",
-                    isSelected: _currentIndex == 2,
-                    onTap: () => setState(() => _currentIndex = 2),
-                  ),
-                  NavBarIcon(
-                    icon: Icons.chat_bubble_outline,
-                    label: "Chats",
-                    isSelected: _currentIndex == 3,
-                    onTap: () => setState(() => _currentIndex = 3),
-                  ),
-                  NavBarIcon(
-                    icon: Icons.school_outlined,
-                    label: "Tutorials",
-                    isSelected: _currentIndex == 4,
-                    onTap: () => setState(() => _currentIndex = 4),
-                  ),
-                  NavBarIcon(
-                    icon: Icons.volunteer_activism,
-                    label: "Donations",
-                    isSelected: _currentIndex == 5,
-                    onTap: () => setState(() => _currentIndex = 5),
-                  ),
-                ],
-              ),
-            ),
+            _buildTopBar(context),
+            Expanded(child: _pages[_currentIndex]),
+            _buildBottomNavBar(),
           ],
         ),
       ),
     );
   }
-}
 
-class NavBarIcon extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool isSelected;
-  final VoidCallback? onTap;
+  // Top Bar Section
+  Widget _buildTopBar(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => _showProfileMenu(context), // Open the ProfileMenu
+            child: CircleAvatar(
+              radius: 20,
+              backgroundImage: _profileImageUrl != null
+                  ? NetworkImage(_profileImageUrl!) // Load profile picture
+                  : null,
+              backgroundColor: Colors.lightGreen.shade200,
+              child: _profileImageUrl == null
+                  ? Icon(
+                Icons.account_circle,
+                size: 30.0,
+                color: Colors.lightGreen.shade700,
+              )
+                  : null,
+            ),
+          ),
+          const SizedBox(width: 12.0),
+          Expanded(
+            child: Text(
+              "Welcome, ${widget.username}",
+              style: TextStyle(
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
+                color: Colors.lightGreen.shade700,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.star_border, color: Colors.amber),
+          ),
+          IconButton(
+            onPressed: () => _showNotificationMenu(context),
+            icon: Icon(Icons.notifications_none, color: Colors.grey[700]),
+          ),
+        ],
+      ),
+    );
+  }
 
-  const NavBarIcon({
-    required this.icon,
-    required this.label,
-    this.isSelected = false,
-    this.onTap,
-  });
+  // Bottom Navigation Bar Section
+  Widget _buildBottomNavBar() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 5,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 12.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildNavBarIcon(Icons.home, "Home", 0),
+          _buildNavBarIcon(Icons.shopping_cart, "Cart", 1),
+          _buildNavBarIcon(Icons.shopping_bag, "Orders", 2),
+          _buildNavBarIcon(Icons.chat_bubble_outline, "Chats", 3),
+          _buildNavBarIcon(Icons.school_outlined, "Tutorials", 4),
+          _buildNavBarIcon(Icons.volunteer_activism, "Donations", 5),
+        ],
+      ),
+    );
+  }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildNavBarIcon(IconData icon, String label, int index) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () => setState(() => _currentIndex = index),
       child: AnimatedContainer(
-        duration: Duration(milliseconds: 200),
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected
+          color: _currentIndex == index
               ? Colors.lightGreen.withOpacity(0.1)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
@@ -236,20 +172,26 @@ class NavBarIcon extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             AnimatedScale(
-              duration: Duration(milliseconds: 200),
-              scale: isSelected ? 1.2 : 1.0,
+              duration: const Duration(milliseconds: 200),
+              scale: _currentIndex == index ? 1.2 : 1.0,
               child: Icon(
                 icon,
-                color: isSelected ? Colors.lightGreen : Colors.grey[600],
+                color: _currentIndex == index
+                    ? Colors.lightGreen
+                    : Colors.grey[600],
               ),
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
                 fontSize: 12,
-                color: isSelected ? Colors.lightGreen : Colors.grey[600],
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: _currentIndex == index
+                    ? Colors.lightGreen
+                    : Colors.grey[600],
+                fontWeight: _currentIndex == index
+                    ? FontWeight.bold
+                    : FontWeight.normal,
               ),
             ),
           ],
@@ -257,4 +199,50 @@ class NavBarIcon extends StatelessWidget {
       ),
     );
   }
+
+  // Dialog for Profile Menu
+  void _showProfileMenu(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black54, // Add semi-transparent overlay
+      builder: (context) => Dialog(
+        alignment: Alignment.topLeft,
+        insetPadding: const EdgeInsets.only(top: 70, left: 16),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        child: ProfileMenu(username: widget.username),
+      ),
+    );
+  }
+
+  // Dialog for Notification Menu
+  void _showNotificationMenu(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black54,
+      builder: (context) => const Dialog(
+        alignment: Alignment.topRight,
+        insetPadding: EdgeInsets.only(top: 70, right: 16),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        child: NotificationMenu(),
+      ),
+    );
+  }
+
+  final List<Widget> _pages = [
+    SingleChildScrollView(
+      child: Column(
+        children: const [
+          FeaturedCarousel(),
+          CategorySection(),
+        ],
+      ),
+    ),
+    const CartSection(),
+    const OrdersSection(),
+    const ChatSection(),
+    const TutorialsSection(),
+    const DonationsSection(),
+  ];
 }
