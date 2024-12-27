@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'item_details_popup.dart'; // Import the popup implementation
 
 class ItemListScreen extends StatefulWidget {
   const ItemListScreen({Key? key}) : super(key: key);
@@ -13,9 +14,10 @@ class _ItemListScreenState extends State<ItemListScreen> {
   final SupabaseClient _supabase = Supabase.instance.client;
   List<dynamic> _items = [];
   bool _isLoading = true;
+  String _searchQuery = '';
   Position? _userPosition;
 
-  final List<String> _categories = ['New', 'Popular', 'Nearest'];
+  final List<String> _categories = ['New', 'Nearest']; // Removed "Popular"
   int _selectedIndex = 0;
 
   @override
@@ -45,18 +47,52 @@ class _ItemListScreenState extends State<ItemListScreen> {
     });
 
     try {
+      // Fetch items from Supabase
       final response = await _supabase
           .from('items')
-          .select('*, profiles(username)')
-          .order('created_at', ascending: false);
+          .select('*, profiles(username, profile_image_url)')
+          .ilike('name', '%$_searchQuery%'); // Apply search filter
 
-      if (response != null) {
+      if (response == null) {
         setState(() {
-          _items = response;
+          _items = [];
         });
-      } else {
-        throw Exception('Failed to fetch items.');
+        return;
       }
+
+      List<dynamic> items = response as List<dynamic>;
+
+      // Sort items based on selected category
+      if (_selectedIndex == 0) {
+        // "New" category: Sort by 'created_at' locally
+        items.sort((a, b) {
+          final createdAtA = DateTime.parse(a['created_at']);
+          final createdAtB = DateTime.parse(b['created_at']);
+          return createdAtB.compareTo(createdAtA); // Newest first
+        });
+      } else if (_selectedIndex == 1 && _userPosition != null) {
+        // "Nearest" category: Sort by distance locally
+        items.sort((a, b) {
+          final distanceA = _calculateDistance(
+            _userPosition!.latitude,
+            _userPosition!.longitude,
+            a['latitude'],
+            a['longitude'],
+          );
+          final distanceB = _calculateDistance(
+            _userPosition!.latitude,
+            _userPosition!.longitude,
+            b['latitude'],
+            b['longitude'],
+          );
+          return distanceA.compareTo(distanceB); // Nearest first
+        });
+      }
+
+      // Update the state with sorted items
+      setState(() {
+        _items = items;
+      });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error fetching items: $e')),
@@ -68,7 +104,8 @@ class _ItemListScreenState extends State<ItemListScreen> {
     }
   }
 
-  double _calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+  double _calculateDistance(double lat1, double lon1, double? lat2, double? lon2) {
+    if (lat2 == null || lon2 == null) return double.infinity;
     return Geolocator.distanceBetween(lat1, lon1, lat2, lon2) / 1000; // Convert to km
   }
 
@@ -80,6 +117,12 @@ class _ItemListScreenState extends State<ItemListScreen> {
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: TextField(
+            onChanged: (value) {
+              setState(() {
+                _searchQuery = value;
+              });
+              _fetchItems();
+            },
             decoration: InputDecoration(
               hintText: 'Search items...',
               prefixIcon: Icon(Icons.search, color: Colors.grey),
@@ -120,6 +163,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
                       setState(() {
                         _selectedIndex = index;
                       });
+                      _fetchItems();
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _selectedIndex == index
@@ -163,24 +207,25 @@ class _ItemListScreenState extends State<ItemListScreen> {
               ? const Center(child: Text('No items found'))
               : GridView.builder(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            gridDelegate:
+            const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               childAspectRatio: 0.75,
               crossAxisSpacing: 16.0,
               mainAxisSpacing: 16.0,
             ),
             itemCount: _items.length,
-            itemBuilder: (context, index) => _buildItemCard(
-              _items[index],
-            ),
+            itemBuilder: (context, index) =>
+                _buildItemCard(context, _items[index]),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildItemCard(Map<String, dynamic> item) {
-    final uploaderName = item['profiles']['username']; // Username of uploader.
+  Widget _buildItemCard(BuildContext context, Map<String, dynamic> item) {
+    final uploaderName = item['profiles']['username'];
+    final profileImageUrl = item['profiles']['profile_image_url'];
     double? distance;
 
     if (_userPosition != null &&
@@ -196,7 +241,8 @@ class _ItemListScreenState extends State<ItemListScreen> {
 
     return GestureDetector(
       onTap: () {
-        debugPrint('Navigating to details of: ${item['name']}');
+        // Show item details as a popup
+        showItemDetailsPopup(context, item, distance);
       },
       child: Container(
         decoration: BoxDecoration(
@@ -226,7 +272,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
                   Center(
                     child: item['images'] != null && item['images'].isNotEmpty
                         ? Image.network(
-                      item['images'][0], // Display the first image.
+                      item['images'][0],
                       fit: BoxFit.cover,
                     )
                         : Icon(
@@ -238,16 +284,24 @@ class _ItemListScreenState extends State<ItemListScreen> {
                   Positioned(
                     top: 8,
                     right: 8,
-                    child: IconButton(
-                      icon: Icon(Icons.favorite_border),
-                      color: Colors.grey[600],
-                      onPressed: () {},
+                    child: CircleAvatar(
+                      backgroundImage: profileImageUrl != null
+                          ? NetworkImage(profileImageUrl)
+                          : null,
+                      backgroundColor: Colors.grey.shade200,
+                      radius: 20,
+                      child: profileImageUrl == null
+                          ? const Icon(
+                        Icons.person,
+                        size: 20,
+                        color: Colors.grey,
+                      )
+                          : null,
                     ),
                   ),
                 ],
               ),
             ),
-            // Item Details
             Padding(
               padding: const EdgeInsets.all(12.0),
               child: Column(
@@ -273,7 +327,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '@$uploaderName', // Display the uploader's username.
+                    '@$uploaderName',
                     style: TextStyle(
                       color: Colors.grey[600],
                       fontSize: 12,
