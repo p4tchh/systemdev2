@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -85,24 +84,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final fileName = 'profile_${DateTime.now().millisecondsSinceEpoch}.jpg';
 
     try {
-      final response = await Supabase.instance.client.storage
+      await Supabase.instance.client.storage
           .from('avatars')
-          .uploadBinary(fileName, fileBytes,
-              fileOptions: const FileOptions(upsert: true));
+          .uploadBinary(fileName, fileBytes, fileOptions: const FileOptions(upsert: true));
 
-      if (response != null) {
-        final publicUrl = Supabase.instance.client.storage
-            .from('avatars')
-            .getPublicUrl(fileName);
+      final publicUrl = Supabase.instance.client.storage
+          .from('avatars')
+          .getPublicUrl(fileName);
 
-        setState(() {
-          _profileImageUrl = publicUrl;
-        });
+      setState(() {
+        _profileImageUrl = publicUrl;
+      });
 
-        await _updateProfile({'profile_image_url': publicUrl});
+      await _updateProfile({'profile_image_url': publicUrl});
 
-        _showMessage('Profile picture uploaded successfully!');
-      }
+      _showMessage('Profile picture uploaded successfully!');
     } catch (e) {
       _showMessage('Error uploading profile picture: $e');
     }
@@ -186,223 +182,223 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
+        child: Column(
+          children: [
+            // Profile Picture Section
+            Container(
+              width: double.infinity,
+              color: Colors.white,
               child: Column(
                 children: [
-                  // Profile Picture Section
                   Container(
-                    width: double.infinity,
-                    color: Colors.white,
-                    child: Column(
-                      children: [
-                        Container(
-                          height: 200,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                Colors.lightGreen.shade200,
-                                Colors.lightGreen.shade100,
-                              ],
-                            ),
-                          ),
-                        ),
-                        Transform.translate(
-                          offset: const Offset(0, -50),
-                          child: Column(
-                            children: [
-                              Stack(
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: Colors.white,
-                                        width: 5,
-                                      ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.1),
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 4),
-                                        ),
-                                      ],
-                                    ),
-                                    child: CircleAvatar(
-                                      radius: 60,
-                                      backgroundColor:
-                                          Colors.lightGreen.shade100,
-                                      backgroundImage:
-                                          _profileImageUrl.isNotEmpty
-                                              ? NetworkImage(_profileImageUrl)
-                                              : null,
-                                      child: _profileImageUrl.isEmpty
-                                          ? Icon(
-                                              Icons.person,
-                                              size: 60,
-                                              color: Colors.lightGreen.shade700,
-                                            )
-                                          : null,
-                                    ),
-                                  ),
-                                  Positioned(
-                                    bottom: 0,
-                                    right: 0,
-                                    child: GestureDetector(
-                                      onTap: _uploadProfilePicture,
-                                      child: Container(
-                                        padding: const EdgeInsets.all(8),
-                                        decoration: BoxDecoration(
-                                          color: Colors.lightGreen,
-                                          shape: BoxShape.circle,
-                                          border: Border.all(
-                                            color: Colors.white,
-                                            width: 3,
-                                          ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color:
-                                                  Colors.black.withOpacity(0.1),
-                                              blurRadius: 4,
-                                              offset: const Offset(0, 2),
-                                            ),
-                                          ],
-                                        ),
-                                        child: const Icon(
-                                          Icons.camera_alt,
-                                          size: 24,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                widget.username,
-                                style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              const Text(
-                                'Member since January 2024',
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Bio Section
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    height: 200,
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.lightGreen.shade200,
+                          Colors.lightGreen.shade100,
+                        ],
+                      ),
                     ),
+                  ),
+                  Transform.translate(
+                    offset: const Offset(0, -50),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: const [
-                                  Icon(
-                                    Icons.edit_note,
-                                    color: Colors.lightGreen,
-                                    size: 28,
-                                  ),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Bio',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                        Stack(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white,
+                                  width: 5,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
                                   ),
                                 ],
                               ),
-                              IconButton(
-                                icon: Icon(
-                                  _isEditing ? Icons.close : Icons.edit,
-                                  color: Colors.grey[600],
-                                ),
-                                onPressed: () {
-                                  setState(() => _isEditing = !_isEditing);
-                                },
+                              child: CircleAvatar(
+                                radius: 60,
+                                backgroundColor:
+                                Colors.lightGreen.shade100,
+                                backgroundImage:
+                                _profileImageUrl.isNotEmpty
+                                    ? NetworkImage(_profileImageUrl)
+                                    : null,
+                                child: _profileImageUrl.isEmpty
+                                    ? Icon(
+                                  Icons.person,
+                                  size: 60,
+                                  color: Colors.lightGreen.shade700,
+                                )
+                                    : null,
                               ),
-                            ],
+                            ),
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: GestureDetector(
+                                onTap: _uploadProfilePicture,
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.lightGreen,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Colors.white,
+                                      width: 3,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color:
+                                        Colors.black.withOpacity(0.1),
+                                        blurRadius: 4,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Icon(
+                                    Icons.camera_alt,
+                                    size: 24,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          widget.username,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const Divider(height: 1),
-                        Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: _isEditing
-                              ? TextField(
-                                  controller: _bioController,
-                                  maxLines: 4,
-                                  maxLength: 150,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    height: 1.5,
-                                  ),
-                                  decoration: InputDecoration(
-                                    hintText:
-                                        'Write something about yourself...',
-                                    hintStyle:
-                                        TextStyle(color: Colors.grey[400]),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(
-                                          color: Colors.grey.shade300),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: const BorderSide(
-                                          color: Colors.lightGreen, width: 2),
-                                    ),
-                                    filled: true,
-                                    fillColor: Colors.grey.shade50,
-                                  ),
-                                )
-                              : Text(
-                                  _bioController.text.isEmpty
-                                      ? 'No bio yet'
-                                      : _bioController.text,
-                                  style: const TextStyle(
-                                    color: Colors.grey,
-                                    height: 1.5,
-                                    fontSize: 16,
-                                  ),
-                                ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Member since January 2024',
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 14,
+                          ),
                         ),
+                        const SizedBox(height: 20),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 24),
                 ],
               ),
             ),
+            const SizedBox(height: 12),
+
+            // Bio Section
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: const [
+                            Icon(
+                              Icons.edit_note,
+                              color: Colors.lightGreen,
+                              size: 28,
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              'Bio',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            _isEditing ? Icons.close : Icons.edit,
+                            color: Colors.grey[600],
+                          ),
+                          onPressed: () {
+                            setState(() => _isEditing = !_isEditing);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: _isEditing
+                        ? TextField(
+                      controller: _bioController,
+                      maxLines: 4,
+                      maxLength: 150,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        height: 1.5,
+                      ),
+                      decoration: InputDecoration(
+                        hintText:
+                        'Write something about yourself...',
+                        hintStyle:
+                        TextStyle(color: Colors.grey[400]),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                              color: Colors.grey.shade300),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                              color: Colors.lightGreen, width: 2),
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey.shade50,
+                      ),
+                    )
+                        : Text(
+                      _bioController.text.isEmpty
+                          ? 'No bio yet'
+                          : _bioController.text,
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        height: 1.5,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
+        ),
+      ),
     );
   }
 }
