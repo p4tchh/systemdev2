@@ -114,7 +114,8 @@ class _ProfileMenuState extends State<ProfileMenu> {
   Widget _buildHeader(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // Show ProfilePopup when the header is tapped
+        // Close the ProfileMenu before showing the ProfilePopup
+        Navigator.of(context).pop(); // Close the ProfileMenu dialog
         showDialog(
           context: context,
           builder: (context) => ProfilePopup(
@@ -217,5 +218,6 @@ class _ProfileMenuState extends State<ProfileMenu> {
     }
   }
 }
+
 
 

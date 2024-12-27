@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '/src/widgets/profile_menu.dart';
 import '/src/widgets/featured_carousel.dart';
 import '/src/widgets/notification_menu.dart';
-import '/src/widgets/category_section.dart';
+import '/src/screens/marketplace/item_list_screen.dart';
 import '/src/widgets/cart_section.dart';
 import '/src/widgets/orders_section.dart';
 import '/src/widgets/chat_section.dart';
@@ -96,10 +96,10 @@ class _UserDashboardState extends State<UserDashboard> {
               backgroundColor: Colors.lightGreen.shade200,
               child: _profileImageUrl == null
                   ? Icon(
-                Icons.account_circle,
-                size: 30.0,
-                color: Colors.lightGreen.shade700,
-              )
+                      Icons.account_circle,
+                      size: 30.0,
+                      color: Colors.lightGreen.shade700,
+                    )
                   : null,
             ),
           ),
@@ -231,13 +231,13 @@ class _UserDashboardState extends State<UserDashboard> {
   }
 
   final List<Widget> _pages = [
-    SingleChildScrollView(
-      child: Column(
-        children: const [
-          FeaturedCarousel(),
-          CategorySection(),
-        ],
-      ),
+    Column(
+      children: const [
+        FeaturedCarousel(),
+        Expanded(
+          child: ItemListScreen(),
+        ),
+      ],
     ),
     const CartSection(),
     const OrdersSection(),

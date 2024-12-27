@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '/src/screens/marketplace/upload_item_screen.dart'; // Import UploadItemScreen
 
 class ProfilePopup extends StatelessWidget {
   final String username;
@@ -40,7 +41,14 @@ class ProfilePopup extends StatelessWidget {
                     Container(
                       height: 150,
                       decoration: BoxDecoration(
-                        color: Colors.lightGreen.shade100,
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.lightGreen.shade200,
+                            Colors.lightGreen.shade100,
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
                         borderRadius: const BorderRadius.vertical(
                           top: Radius.circular(25),
                         ),
@@ -114,15 +122,24 @@ class ProfilePopup extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _buildActionButton('Tutorials'),
-                    _buildActionButton('Shop'),
-                    _buildActionButton('Donation'),
+                    _buildActionButton(context, 'Tutorials', () {}),
+                    _buildActionButton(context, 'Shop', () {}),
+                    _buildActionButton(context, 'Donation', () {}),
                   ],
                 ),
                 const SizedBox(height: 30),
-                // Close Button
-                ElevatedButton(
-                  onPressed: () => Navigator.of(context).pop(),
+                // Upload Item Button
+                ElevatedButton.icon(
+                  onPressed: () {
+                    // Navigate to UploadItemScreen directly
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const UploadItemScreen(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text('Upload Item'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.lightGreen,
                     shape: RoundedRectangleBorder(
@@ -131,13 +148,6 @@ class ProfilePopup extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                       horizontal: 40,
                       vertical: 12,
-                    ),
-                  ),
-                  child: const Text(
-                    'Close',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
@@ -174,9 +184,10 @@ class ProfilePopup extends StatelessWidget {
   }
 
   // Helper method to build action buttons
-  Widget _buildActionButton(String label) {
+  Widget _buildActionButton(
+      BuildContext context, String label, VoidCallback onTap) {
     return ElevatedButton(
-      onPressed: () {},
+      onPressed: onTap,
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.lightGreen.shade100,
         elevation: 0,
@@ -196,3 +207,6 @@ class ProfilePopup extends StatelessWidget {
     );
   }
 }
+
+
+
