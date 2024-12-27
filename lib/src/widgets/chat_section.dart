@@ -12,16 +12,16 @@ class _ChatSectionState extends State<ChatSection>
   final List<Map<String, dynamic>> _chatList = [
     {
       'name': 'Macy',
-      'message': 'typing...',
+      'message': 'Mygosh!',
       'isOnline': true,
-      'isTyping': true,
+      'isTyping': false,
       'imageUrl': 'assets/images/profile1.jpg',
     },
     {
       'name': 'Sasha',
-      'message': 'typing...',
-      'isOnline': true,
-      'isTyping': true,
+      'message': 'Hey, how are you?',
+      'isOnline': false,
+      'isTyping': false,
       'imageUrl': 'assets/images/profile2.jpg',
     },
   ];
